@@ -1,0 +1,317 @@
+<title>Doma Automated Trading, Concept</title>
+<style>
+  :root {
+    --ground: #070d18;
+    --ground-2: #0b1424;
+    --surface: rgba(255,255,255,0.035);
+    --surface-2: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.09);
+    --border-strong: rgba(255,255,255,0.14);
+    --ink: #eaf0f8;
+    --muted: #8b98ad;
+    --muted-2: #61708a;
+    --cyan: #63c8ff;
+    --cyan-2: #57e9ff;
+    --cyan-deep: #38bdf8;
+    --emerald: #34d399;
+    --amber: #fbbf24;
+    --grad: linear-gradient(90deg, #63c8ff, #57e9ff);
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* subtle atmosphere: one restrained cyan glow up top */
+  .bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(900px 480px at 50% -180px, rgba(87,233,255,0.10), transparent 70%),
+      radial-gradient(700px 400px at 85% 8%, rgba(56,189,248,0.05), transparent 70%);
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 72px 24px 96px;
+  }
+
+  .fade { opacity: 0; transform: translateY(10px); animation: rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
+  .fade.d1 { animation-delay: .05s; }
+  .fade.d2 { animation-delay: .12s; }
+  .fade.d3 { animation-delay: .19s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .fade { animation: none; opacity: 1; transform: none; }
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 22px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--cyan-2);
+    box-shadow: 0 0 12px 1px rgba(87,233,255,.7);
+  }
+
+  h1 {
+    font-size: clamp(34px, 6vw, 54px);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    margin: 0 0 20px;
+    text-wrap: balance;
+    max-width: 15ch;
+  }
+
+  .lead {
+    font-size: 19px;
+    color: var(--muted);
+    max-width: 60ch;
+    margin: 0 0 34px;
+  }
+  .lead strong { color: var(--ink); font-weight: 600; }
+
+  /* primary action */
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--sans);
+    font-weight: 650;
+    font-size: 16px;
+    color: #04121f;
+    text-decoration: none;
+    background: var(--grad);
+    padding: 15px 24px;
+    border-radius: 14px;
+    box-shadow: 0 8px 30px -8px rgba(87,233,255,.45);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .cta:hover { transform: translateY(-1px); box-shadow: 0 12px 36px -8px rgba(87,233,255,.6); }
+  .cta:focus-visible { outline: 2px solid var(--cyan-2); outline-offset: 3px; }
+  .cta svg { width: 18px; height: 18px; }
+  .cta-note {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--muted-2);
+    margin: 14px 0 0;
+    letter-spacing: .01em;
+  }
+
+  section { margin-top: 64px; }
+  .label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    margin: 0 0 18px;
+  }
+  h2 {
+    font-size: 25px;
+    letter-spacing: -0.02em;
+    font-weight: 660;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  .sub { color: var(--muted); max-width: 62ch; margin: 0 0 26px; }
+
+  /* numbered flow */
+  .flow { display: flex; flex-direction: column; gap: 12px; }
+  .step {
+    display: grid;
+    grid-template-columns: 54px 1fr;
+    gap: 18px;
+    align-items: start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+  .step .n {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.4;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-variant-numeric: tabular-nums;
+  }
+  .step h3 { margin: 0 0 4px; font-size: 16.5px; font-weight: 620; letter-spacing: -0.01em; }
+  .step p { margin: 0; color: var(--muted); font-size: 14.5px; }
+  .step .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: .04em;
+  }
+
+  /* two-column strategy groups */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 680px) { .cols { grid-template-columns: 1fr; } }
+
+  .group {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+  }
+  .group > .gh {
+    display: flex; align-items: center; gap: 9px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+    margin: 0 0 16px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.ok { background: var(--emerald); box-shadow: 0 0 10px 0 rgba(52,211,153,.6); }
+  .dot.pend { background: var(--amber); box-shadow: 0 0 10px 0 rgba(251,191,36,.55); }
+  .gh.ok { color: var(--emerald); }
+  .gh.pend { color: var(--amber); }
+
+  .item { padding: 13px 0; border-top: 1px solid var(--border); }
+  .item:first-of-type { border-top: 0; padding-top: 2px; }
+  .item .name { font-weight: 600; font-size: 15px; margin: 0 0 3px; }
+  .item .desc { color: var(--muted); font-size: 13.5px; margin: 0; }
+  .item .req { color: var(--amber); }
+  .item .req b { font-family: var(--mono); font-weight: 600; font-size: 12.5px; }
+
+  /* under the hood list */
+  .facts { display: flex; flex-direction: column; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 4px 22px; }
+  .fact { display: grid; grid-template-columns: 150px 1fr; gap: 18px; padding: 16px 0; border-top: 1px solid var(--border); }
+  .fact:first-child { border-top: 0; }
+  .fact dt { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--cyan); text-transform: uppercase; margin: 3px 0 0; }
+  .fact dd { margin: 0; color: var(--muted); font-size: 14.5px; }
+  .fact dd b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 560px) { .fact { grid-template-columns: 1fr; gap: 6px; } }
+
+  .foot {
+    margin-top: 70px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;
+  }
+  .foot p { margin: 0; color: var(--muted-2); font-size: 13px; font-family: var(--mono); letter-spacing: .02em; }
+  .foot .cta { font-size: 14.5px; padding: 12px 20px; }
+</style>
+
+<div class="bg"></div>
+
+<main class="wrap">
+
+  <header>
+    <p class="eyebrow fade">Doma · Product concept</p>
+    <h1 class="fade d1">Automated trading, built into Doma.</h1>
+    <p class="lead fade d1">
+      Pick a strategy, set a spending cap, hit play. An agent runs it on your wallet, on-chain,
+      while you're away, all riding on the <strong>limit-order infra we're already building</strong>.
+      No code, no separate bot platform. Here's the direction, as a clickable prototype.
+    </p>
+    <div class="fade d2">
+      <a class="cta" href="https://mayank-d3.github.io/doma-agentic-trading/" target="_blank" rel="noopener">
+        Open the interactive prototype
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+      </a>
+      <p class="cta-note">Opens the full prototype directly · clickable, all six screens · shareable with anyone</p>
+    </div>
+  </header>
+
+  <section>
+    <p class="label">The idea</p>
+    <h2>A shelf of one-tap strategies on our own AMM.</h2>
+    <p class="sub">
+      The same "select a strategy, put in config, hit play" surface the team sketched, living inside the
+      Doma app, not a months-long standalone bot platform. The user authorizes once; every strategy is
+      just intents on our Uniswap V3 pools, executed by the limit-order backend. The screen stays a thin
+      layer: configure and watch profit-and-loss. The trading itself runs server-side.
+    </p>
+  </section>
+
+  <section>
+    <p class="label">The flow</p>
+    <h2>Four steps, whichever strategy you pick.</h2>
+    <p class="sub">Grid trading and buy-low / sell-high both run through the same four-step path; only the configure step changes shape.</p>
+    <div class="flow">
+      <div class="step fade"><div class="n">01</div><div>
+        <h3>Choose a strategy</h3>
+        <p>A small gallery of playbooks, Grid trading, Buy low / sell high, DCA, each with a plain-English one-liner and a "best for" tag.</p>
+      </div></div>
+      <div class="step fade"><div class="n">02</div><div>
+        <h3>Configure, with the orders drawn on the chart</h3>
+        <p>Set the range, grid count, and amount. A live price chart shows exactly where each buy sits below price and each sell above it, so the strategy is legible before you commit. Buy-low / sell-high collapses this to a single buy price, sell price, and amount.</p>
+      </div></div>
+      <div class="step fade"><div class="n">03</div><div>
+        <h3>Authorize, once, and capped</h3>
+        <p>One approval lets the agent trade on your behalf, but only on Doma pairs and only up to the cap you set. <span class="tag">Pause or revoke anytime.</span></p>
+      </div></div>
+      <div class="step fade"><div class="n">04</div><div>
+        <h3>Monitor, realized vs floating, live</h3>
+        <p>Grid profit (realized, from matched buy-low/sell-high pairs) sits next to unrealized P&amp;L, with executed fills plotted on the grid. Run several at once from a "My strategies" view.</p>
+      </div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">What this needs from the infra</p>
+    <h2>Two strategies ship on the limit-order infra as-is. Two need one more building block.</h2>
+    <p class="sub">The split is clean, and it's about execution actions, not triggers: everything price- or schedule-based already fits.</p>
+    <div class="cols">
+      <div class="group fade">
+        <p class="gh ok"><span class="dot ok"></span>Ready on the limit-order infra</p>
+        <div class="item"><p class="name">Grid trading</p><p class="desc">A ladder of resting buy/sell limit orders that re-arm the opposite side on each fill. The re-arm lives in the orders-worker; the screen just tracks the range.</p></div>
+        <div class="item"><p class="name">Buy low, sell high</p><p class="desc">A one-level grid, buy at your low, sell at your high, repeat. Inder's "combo of limit orders," verbatim.</p></div>
+        <div class="item"><p class="name">DCA on a timer</p><p class="desc">A scheduled buy, already working in the current POC.</p></div>
+      </div>
+      <div class="group fade d1">
+        <p class="gh pend"><span class="dot pend"></span>Needs one more building block</p>
+        <div class="item"><p class="name">Buy during bonding</p><p class="desc">Trigger fits fine, but a pre-graduation token has no V3 pool yet, <span class="req">requires <b>a bonding-curve fill path</b></span> alongside the swap-based fill.</p></div>
+        <div class="item"><p class="name">Buy &amp; create LP</p><p class="desc">The buy is a normal limit order; the "create LP" half is a mint, not a swap, <span class="req">requires <b>an LP-provisioning action</b></span> chained after the fill.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Under the hood</p>
+    <h2>Why it's a thin frontend on top of what we're building.</h2>
+    <dl class="facts fade">
+      <div class="fact"><dt>Trigger</dt><dd>The limit-order backend already watches Uniswap swaps and fills resting orders. A grid is just a set of those orders that <b>re-arms on fill</b>.</dd></div>
+      <div class="fact"><dt>Where it runs</dt><dd>The hot loop lives on the <b>server (orders-worker)</b>, so it keeps running when the tab is closed. The browser only configures and displays.</dd></div>
+      <div class="fact"><dt>Extra infra</dt><dd><b>None</b> for grid / buy-low, as long as the re-arm-on-fill is a first-class primitive in the orders-worker rather than a browser loop.</dd></div>
+      <div class="fact"><dt>Fairness</dt><dd>A grid's orders spread across many price levels, so the "who fills first" problem mostly dissolves. v1 is <b>first-come-first-serve with disclosures</b>, per the team's call.</dd></div>
+    </dl>
+  </section>
+
+  <div class="foot">
+    <p>Built in Claude Design on the Doma design system.</p>
+    <a class="cta" href="https://mayank-d3.github.io/doma-agentic-trading/" target="_blank" rel="noopener">
+      Open the prototype
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+    </a>
+  </div>
+
+</main>
