@@ -237,7 +237,7 @@
         Open the interactive prototype
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
       </a>
-      <p class="cta-note">Opens the full prototype directly · clickable, all six screens · shareable with anyone</p>
+      <p class="cta-note">Opens the full prototype directly · clickable, every screen · shareable with anyone</p>
     </div>
   </header>
 
@@ -255,44 +255,60 @@
   <section>
     <p class="label">The flow</p>
     <h2>Four steps, whichever strategy you pick.</h2>
-    <p class="sub">Grid trading and buy-low / sell-high both run through the same four-step path; only the configure step changes shape.</p>
+    <p class="sub">Every strategy runs through the same four-step path; only the configure step changes shape.</p>
     <div class="flow">
       <div class="step fade"><div class="n">01</div><div>
         <h3>Choose a strategy</h3>
-        <p>A small gallery of playbooks, Grid trading, Buy low / sell high, DCA, each with a plain-English one-liner and a "best for" tag.</p>
+        <p>A gallery of playbooks, Grid trading, Buy the floor discount, Buy low / sell high, and DCA, each with a plain-English one-liner and a tag.</p>
       </div></div>
       <div class="step fade"><div class="n">02</div><div>
         <h3>Configure, with the orders drawn on the chart</h3>
-        <p>Set the range, grid count, and amount. A live price chart shows exactly where each buy sits below price and each sell above it, so the strategy is legible before you commit. Buy-low / sell-high collapses this to a single buy price, sell price, and amount.</p>
+        <p>Each strategy has its own configure screen with a live price chart, validation, and a fee-aware profit line. Grid has Auto (a suggested range from recent volatility) and Manual (every field, with error states for an inverted range, a too-small order, or profit below fees). The others collapse to their own handful of fields.</p>
       </div></div>
       <div class="step fade"><div class="n">03</div><div>
         <h3>Authorize, once, and capped</h3>
-        <p>One approval lets the agent trade on your behalf, but only on Doma pairs and only up to the cap you set. <span class="tag">Pause or revoke anytime.</span></p>
+        <p>One approval lets the agent trade on your behalf, but only on Doma pairs and only up to the cap you set. One approval covers every strategy; a new strategy inside your unallocated approval needs no signature. <span class="tag">Pause or revoke anytime.</span></p>
       </div></div>
       <div class="step fade"><div class="n">04</div><div>
         <h3>Monitor, realized vs floating, live</h3>
-        <p>Grid profit (realized, from matched buy-low/sell-high pairs) sits next to unrealized P&amp;L, with executed fills plotted on the grid. Run several at once from a "My strategies" view.</p>
+        <p>Realized grid profit sits next to unrealized P&amp;L, with executed fills in the activity feed. Pause or close a strategy (sell back to USDC or keep the tokens), read the matched-trades history, and handle out-of-range and budget-used states. Run several at once from a "My strategies" dashboard.</p>
       </div></div>
     </div>
   </section>
 
   <section>
     <p class="label">What this needs from the infra</p>
-    <h2>Two strategies ship on the limit-order infra as-is. Two need one more building block.</h2>
-    <p class="sub">The split is clean, and it's about execution actions, not triggers: everything price- or schedule-based already fits.</p>
+    <h2>Most of the shelf ships on the limit-order infra as-is. A few pieces need one more building block.</h2>
+    <p class="sub">The split is about execution actions, not triggers: everything price- or schedule-based already fits.</p>
     <div class="cols">
       <div class="group fade">
         <p class="gh ok"><span class="dot ok"></span>Ready on the limit-order infra</p>
-        <div class="item"><p class="name">Grid trading</p><p class="desc">A ladder of resting buy/sell limit orders that re-arm the opposite side on each fill. The re-arm lives in the orders-worker; the screen just tracks the range.</p></div>
-        <div class="item"><p class="name">Buy low, sell high</p><p class="desc">A one-level grid, buy at your low, sell at your high, repeat. Inder's "combo of limit orders," verbatim.</p></div>
-        <div class="item"><p class="name">DCA on a timer</p><p class="desc">A scheduled buy, already working in the current POC.</p></div>
+        <div class="item"><p class="name">Grid trading (one pass)</p><p class="desc">A ladder of resting buy/sell limit orders placed across your range.</p></div>
+        <div class="item"><p class="name">Buy the floor discount</p><p class="desc">One conditional buy at the on-chain buyout floor times one minus your discount. The Doma-exclusive strategy, and it needs nothing new.</p></div>
+        <div class="item"><p class="name">Buy low, sell high (run once)</p><p class="desc">A one-level grid, buy at your low, sell at your high, then stop. Inder's "combo of limit orders," verbatim.</p></div>
+        <div class="item"><p class="name">DCA (single buy)</p><p class="desc">One scheduled buy, already working in the current POC.</p></div>
       </div>
       <div class="group fade d1">
         <p class="gh pend"><span class="dot pend"></span>Needs one more building block</p>
-        <div class="item"><p class="name">Buy during bonding</p><p class="desc">Trigger fits fine, but a pre-graduation token has no V3 pool yet, <span class="req">requires <b>a bonding-curve fill path</b></span> alongside the swap-based fill.</p></div>
-        <div class="item"><p class="name">Buy &amp; create LP</p><p class="desc">The buy is a normal limit order; the "create LP" half is a mint, not a swap, <span class="req">requires <b>an LP-provisioning action</b></span> chained after the fill.</p></div>
+        <div class="item"><p class="name">Repeating (grid loop / repeat)</p><p class="desc">To keep cycling it must re-arm the opposite order on each fill, <span class="req">requires <b>re-arm-on-fill chaining</b></span> in the orders-worker, not the browser.</p></div>
+        <div class="item"><p class="name">DCA scheduling</p><p class="desc">The engine is price-triggered, <span class="req">requires <b>a time trigger</b></span> to run buys on a clock.</p></div>
+        <div class="item"><p class="name">Buy during bonding</p><p class="desc">Trigger fits, but a pre-graduation token has no V3 pool yet, <span class="req">requires <b>a bonding-curve fill path</b></span> alongside the swap-based fill.</p></div>
+        <div class="item"><p class="name">Buy &amp; create LP / LP-mode grid</p><p class="desc">The "create LP" half is a mint, not a swap, <span class="req">requires <b>an LP-provisioning action</b></span> chained after the fill.</p></div>
       </div>
     </div>
+  </section>
+
+  <section>
+    <p class="label">Limit orders vs liquidity</p>
+    <h2>Why not just provide liquidity?</h2>
+    <p class="sub">A narrow Uniswap V3 band above or below price is a range order, so one grid level looks like one LP band. The products still differ where it counts.</p>
+    <dl class="facts fade">
+      <div class="fact"><dt>Fills</dt><dd>A filled limit order stays filled. An LP band <b>converts back if price re-crosses it</b>, so locking a fill would need a bot to withdraw the position.</dd></div>
+      <div class="fact"><dt>Fees</dt><dd>Through the infra you are the taker and <b>pay</b> the pool fee plus slippage per fill. As an LP you are the maker and <b>earn</b> it. That is why the configure screen is fee-aware.</dd></div>
+      <div class="fact"><dt>Control</dt><dd>A limit order has an exact trigger, slippage protection, and a <b>stop loss</b>. An LP band below price buys the falling token unconditionally and cannot stop.</dd></div>
+      <div class="fact"><dt>Coverage</dt><dd>Conditional orders work on <b>bonding-curve tokens with no pool yet</b>. LP needs a live pool.</dd></div>
+    </dl>
+    <p class="sub" style="margin-top:22px">The compounding future version places each grid level as a narrow LP band and withdraws it on the cross, so the grid earns fees per cycle instead of paying them. That depends on LP-position primitives from the infra team, an open question below.</p>
   </section>
 
   <section>
@@ -303,6 +319,18 @@
       <div class="fact"><dt>Where it runs</dt><dd>The hot loop lives on the <b>server (orders-worker)</b>, so it keeps running when the tab is closed. The browser only configures and displays.</dd></div>
       <div class="fact"><dt>Extra infra</dt><dd><b>None</b> for grid / buy-low, as long as the re-arm-on-fill is a first-class primitive in the orders-worker rather than a browser loop.</dd></div>
       <div class="fact"><dt>Fairness</dt><dd>A grid's orders spread across many price levels, so the "who fills first" problem mostly dissolves. v1 is <b>first-come-first-serve with disclosures</b>, per the team's call.</dd></div>
+    </dl>
+  </section>
+
+  <section>
+    <p class="label">Open questions for the limit-order team</p>
+    <h2>What the infra needs to expose for strategies to sit on top.</h2>
+    <dl class="facts fade">
+      <div class="fact"><dt>Grouping</dt><dd>Orders filter by wallet address, but nothing says "these belong to this grid." A grid needs a <b>strategy id on the order</b> so the UI can show, cancel, and account for it as a unit.</dd></div>
+      <div class="fact"><dt>Re-arm</dt><dd>Is chaining (place the opposite order when one fills) a <b>first-class primitive</b> in the orders-worker, or does the strategy layer poll and re-place?</dd></div>
+      <div class="fact"><dt>Per-pair FIFO</dt><dd>One order per pair at a time serializes a grid against itself and against other users. How does a <b>many-order grid</b> coexist with that guard?</dd></div>
+      <div class="fact"><dt>LP primitives</dt><dd>Can the infra <b>mint and withdraw a narrow range position</b> on a trigger? That unlocks the fee-earning LP-mode grid and buy-and-create-LP.</dd></div>
+      <div class="fact"><dt>Also</dt><dd>Fill notifications (push vs poll), realized-vs-unrealized P&amp;L accounting, and batch cancel / expiry / revoke as a kill switch.</dd></div>
     </dl>
   </section>
 
